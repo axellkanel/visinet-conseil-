@@ -762,6 +762,88 @@ section {
     padding: var(--spacing-xl) 0;
 }
 
+/* Blog Preview Section (Homepage) */
+.blog-preview {
+    max-width: 800px;
+    margin: var(--spacing-md) auto 0;
+}
+
+.blog-preview-card {
+    background: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-blue-light);
+    transition: all var(--transition-base);
+}
+
+.blog-preview-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+.blog-preview-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-indigo);
+    background: var(--color-blue-light);
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.blog-preview-tag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-orange);
+}
+
+.blog-preview-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-indigo);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.blog-preview-text {
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+    margin-bottom: var(--spacing-md);
+    font-size: 1rem;
+}
+
+.blog-preview-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-orange);
+    text-decoration: none;
+    font-weight: 600;
+    font-family: var(--font-heading);
+    transition: all var(--transition-base);
+    font-size: 1rem;
+}
+
+.blog-preview-link:hover {
+    color: var(--color-orange-dark);
+    transform: translateX(4px);
+}
+
+.blog-preview-link svg {
+    transition: transform var(--transition-base);
+}
+
+.blog-preview-link:hover svg {
+    transform: translateX(4px);
+}
+
 .blog-wrapper {
     max-width: 900px;
     margin: 0 auto;
@@ -1285,7 +1367,7 @@ section {
 }
 
 .info-content p {
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
     margin: 0;
     font-size: 0.9rem;
 }
@@ -1706,6 +1788,14 @@ section {
 
     .blog-title {
         font-size: 1.55rem;
+    }
+
+    .blog-preview-card {
+        padding: var(--spacing-md);
+    }
+
+    .blog-preview-card h3 {
+        font-size: 1.25rem;
     }
 
     .blog-wrapper h2 {
