@@ -309,6 +309,195 @@ const ScrollAnimations = {
 };
 
 /**
+ * Gestion des cookies et conformité RGPD
+ */
+const CookieManager = {
+    COOKIE_CONSENT_KEY: 'cookie_consent',
+    COOKIE_PREFERENCES_KEY: 'cookie_preferences',
+    
+    init() {
+        this.createCookieBanner();
+        this.loadPreferences();
+    },
+    
+    createCookieBanner() {
+        // Vérifier si le consentement existe déjà
+        if (this.hasConsent()) {
+            return;
+        }
+        
+        // Créer la bannière
+        const banner = document.createElement('div');
+        banner.id = 'cookie-banner';
+        banner.className = 'cookie-banner';
+        banner.setAttribute('role', 'dialog');
+        banner.setAttribute('aria-labelledby', 'cookie-banner-title');
+        banner.innerHTML = `
+            <div class="cookie-banner-content">
+                <div class="cookie-banner-text">
+                    <h3 id="cookie-banner-title">Gestion des cookies</h3>
+                    <p>Nous utilisons des cookies pour améliorer votre expérience sur notre site. Certains cookies sont nécessaires au fonctionnement du site, d'autres nous aident à analyser l'utilisation du site.</p>
+                    <p class="cookie-banner-links">
+                        <a href="politique-confidentialite.html#cookies">En savoir plus sur les cookies</a> | 
+                        <a href="politique-confidentialite.html">Politique de confidentialité</a>
+                    </p>
+                </div>
+                <div class="cookie-banner-actions">
+                    <button class="btn btn-secondary" id="cookie-preferences-btn">Personnaliser</button>
+                    <button class="btn btn-primary" id="cookie-accept-all-btn">Tout accepter</button>
+                    <button class="btn btn-secondary" id="cookie-reject-all-btn">Tout refuser</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(banner);
+        
+        // Événements
+        document.getElementById('cookie-accept-all-btn').addEventListener('click', () => {
+            this.acceptAll();
+        });
+        
+        document.getElementById('cookie-reject-all-btn').addEventListener('click', () => {
+            this.rejectAll();
+        });
+        
+        document.getElementById('cookie-preferences-btn').addEventListener('click', () => {
+            this.showPreferences();
+        });
+    },
+    
+    showPreferences() {
+        const banner = document.getElementById('cookie-banner');
+        if (!banner) return;
+        
+        const preferences = this.getPreferences();
+        
+        banner.innerHTML = `
+            <div class="cookie-banner-content">
+                <div class="cookie-banner-text">
+                    <h3 id="cookie-banner-title">Gérer vos préférences de cookies</h3>
+                    <p>Choisissez les types de cookies que vous souhaitez accepter :</p>
+                </div>
+                <div class="cookie-preferences">
+                    <div class="cookie-preference-item">
+                        <div class="cookie-preference-header">
+                            <label>
+                                <input type="checkbox" id="cookie-necessary" checked disabled>
+                                <strong>Cookies nécessaires</strong>
+                            </label>
+                            <span class="cookie-preference-status">Toujours actif</span>
+                        </div>
+                        <p class="cookie-preference-desc">Ces cookies sont essentiels au fonctionnement du site et ne peuvent pas être désactivés.</p>
+                    </div>
+                    <div class="cookie-preference-item">
+                        <div class="cookie-preference-header">
+                            <label>
+                                <input type="checkbox" id="cookie-analytics" ${preferences.analytics ? 'checked' : ''}>
+                                <strong>Cookies d'analyse</strong>
+                            </label>
+                        </div>
+                        <p class="cookie-preference-desc">Ces cookies nous aident à comprendre comment les visiteurs utilisent notre site.</p>
+                    </div>
+                </div>
+                <div class="cookie-banner-actions">
+                    <button class="btn btn-primary" id="cookie-save-preferences-btn">Enregistrer mes préférences</button>
+                    <button class="btn btn-secondary" id="cookie-cancel-preferences-btn">Annuler</button>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('cookie-save-preferences-btn').addEventListener('click', () => {
+            const analytics = document.getElementById('cookie-analytics').checked;
+            this.savePreferences({ necessary: true, analytics });
+            this.hideBanner();
+        });
+        
+        document.getElementById('cookie-cancel-preferences-btn').addEventListener('click', () => {
+            this.createCookieBanner();
+        });
+    },
+    
+    acceptAll() {
+        this.savePreferences({ necessary: true, analytics: true });
+        this.hideBanner();
+    },
+    
+    rejectAll() {
+        this.savePreferences({ necessary: true, analytics: false });
+        this.hideBanner();
+    },
+    
+    savePreferences(preferences) {
+        const consent = {
+            ...preferences,
+            date: new Date().toISOString()
+        };
+        localStorage.setItem(this.COOKIE_PREFERENCES_KEY, JSON.stringify(consent));
+        localStorage.setItem(this.COOKIE_CONSENT_KEY, 'true');
+        
+        // Appliquer les préférences
+        this.applyPreferences(preferences);
+    },
+    
+    loadPreferences() {
+        if (!this.hasConsent()) return;
+        
+        const stored = localStorage.getItem(this.COOKIE_PREFERENCES_KEY);
+        if (stored) {
+            const preferences = JSON.parse(stored);
+            this.applyPreferences(preferences);
+        }
+    },
+    
+    applyPreferences(preferences) {
+        // Ici vous pouvez ajouter votre code d'analyse (Google Analytics, etc.)
+        // Exemple :
+        // if (preferences.analytics) {
+        //     // Initialiser Google Analytics
+        // } else {
+        //     // Désactiver Google Analytics
+        // }
+    },
+    
+    getPreferences() {
+        const stored = localStorage.getItem(this.COOKIE_PREFERENCES_KEY);
+        if (stored) {
+            return JSON.parse(stored);
+        }
+        return { necessary: true, analytics: false };
+    },
+    
+    hasConsent() {
+        return localStorage.getItem(this.COOKIE_CONSENT_KEY) === 'true';
+    },
+    
+    hideBanner() {
+        const banner = document.getElementById('cookie-banner');
+        if (banner) {
+            banner.style.opacity = '0';
+            setTimeout(() => banner.remove(), 300);
+        }
+    },
+    
+    showPreferencesFromLink() {
+        // Afficher la bannière de préférences même si le consentement existe déjà
+        this.showPreferences();
+    }
+};
+
+// Gestion du lien "Gérer les cookies" dans le footer
+document.addEventListener('DOMContentLoaded', () => {
+    // Ajouter un gestionnaire pour les liens de gestion des cookies
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('[data-cookie-preferences]') || 
+            e.target.closest('[data-cookie-preferences]')) {
+            e.preventDefault();
+            CookieManager.showPreferencesFromLink();
+        }
+    });
+});
+
+/**
  * Initialisation de l'application
  */
 document.addEventListener('DOMContentLoaded', () => {
@@ -318,5 +507,6 @@ document.addEventListener('DOMContentLoaded', () => {
     ContactForm.init();
     FAQ.init();
     ScrollAnimations.init();
+    CookieManager.init();
 });
 
