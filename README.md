@@ -1,6 +1,6 @@
-# Visinet Conseil - Landing Page
+# VisiNet Conseil - Landing Page
 
-Landing page professionnelle pour Visinet Conseil, cabinet de conseil spécialisé dans l'accompagnement des enseignes organisées en réseau (franchises, groupements, multi-sites).
+Landing page professionnelle pour VisiNet Conseil, cabinet de conseil spécialisé dans l'accompagnement des enseignes organisées en réseau (franchises, groupements, multi-sites).
 
 ## 🚀 Fonctionnalités
 
@@ -79,7 +79,7 @@ La page est optimisée pour :
 
 ## 📝 Informations de contact
 
-- **Email** : contact@visinet-conseil.fr
+- **E-mail** : contact@visinet-conseil.fr
 - **Téléphone** : 07 46 25 94 18
 - **Adresse** : Île-de-France, France
 
@@ -96,7 +96,7 @@ Le code JavaScript est organisé en modules :
 
 ## 📄 Licence
 
-© 2024 Visinet Conseil. Tous droits réservés.
+© 2024 VisiNet Conseil. Tous droits réservés.
 
 ---
 
