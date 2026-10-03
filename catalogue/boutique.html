@@ -21,6 +21,8 @@ button{font:inherit}button:focus-visible{outline:3px solid var(--green);outline-
 @media(max-width:960px){.product-actions{flex-direction:column}}
 @media(max-width:720px){.nav-links{justify-content:flex-start;gap:12px 20px}.nav-links a{padding:6px 0}.product-photo{padding:34px 10px 14px}.product-body>p{min-height:58px}.checkout .button{width:100%}.summary{padding:22px}.dialog-grid img{height:240px}.hero-photo{height:360px}.story img{height:340px}}
 @media(max-width:390px){.product-body>p{min-height:0}}
+#added-dialog{width:min(440px,calc(100% - 36px));max-height:calc(100dvh - 36px);padding:24px;overflow:auto;border:1px solid var(--line);border-radius:5px;background:var(--paper);color:var(--ink)}
+#added-dialog h2{font-size:26px;line-height:1.25;margin:16px 0}#added-dialog .added-name{font-size:18px;margin:0 0 8px}#added-dialog .added-price{margin:0 0 24px}#added-dialog .added-actions{display:flex;flex-wrap:wrap;gap:10px}#added-dialog .added-actions .button{flex:1 1 170px;min-height:44px;cursor:pointer}#added-dialog .added-close{display:block;margin-left:auto;min-height:44px;padding:8px 12px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
 </style>
 </head>
 <body>
@@ -46,6 +48,7 @@ button{font:inherit}button:focus-visible{outline:3px solid var(--green);outline-
 <section id="contact" class="section contact" aria-labelledby="contact-title"><div class="wrap contact-grid"><div><p class="eyebrow">Une marque imaginée par VisiNet Conseil</p><h2 id="contact-title">Atelier Botanique</h2><p>Un concept de boutique française consacré aux cosmétiques et aux soins de beauté.</p><a class="button secondary" href="index.html">Retour au catalogue VisiNet Conseil</a></div><div class="contact-details"><strong>Contact</strong><p>26, rue des Feuilles · 69002 Lyon<br>bonjour@atelier-botanique.example</p><p>Une collection dédiée aux petits rituels du quotidien.</p></div></div></section>
 </main>
 <footer class="footer"><div class="wrap footer-inner"><p>Atelier Botanique · Les essentiels du quotidien</p><a href="#accueil">Retour en haut</a></div></footer>
+<dialog id="added-dialog" aria-labelledby="added-title" aria-describedby="added-name added-price"><button type="button" class="added-close" id="close-added" autofocus>Fermer</button><h2 id="added-title">Produit ajouté au panier</h2><p id="added-name" class="added-name"></p><p id="added-price" class="added-price"></p><div class="added-actions"><button type="button" id="continue-shopping" class="button secondary">Continuer mes achats</button><button type="button" id="view-cart" class="button">Voir mon panier</button></div></dialog>
 <dialog id="product-dialog" aria-labelledby="detail-title"><div class="dialog-top"><span>LA FICHE PRODUIT</span><button type="button" id="close-detail" autofocus>Fermer ×</button></div><div class="dialog-grid"><img id="detail-image" alt="" width="700" height="800"><div><p id="detail-category" class="eyebrow"></p><h2 id="detail-title"></h2><p id="detail-price" class="detail-price"></p><p id="detail-description"></p><h3>Le rituel</h3><p id="detail-use"></p><p class="hint">Découvrez les caractéristiques de ce soin et son rituel.</p><button type="button" id="detail-add" class="button">Ajouter au panier</button></div></div></dialog>
 <script>
 'use strict';
@@ -83,13 +86,32 @@ function renderCart(focusId){
  refreshOrder(); if(focusId){let target=document.getElementById(focusId);if(target&&target.disabled)target=document.getElementById(focusId.startsWith('minus-')?focusId.replace('minus-','plus-'):focusId.replace('plus-','minus-'));if(target)target.focus();}
 }
 function changeQuantity(id,delta,focusId){const quantity=(cart.get(id)||0)+delta;if(quantity<1||quantity>99)return;cart.set(id,quantity);renderCart(focusId);announce(products[id].name+' : '+quantity+' unité(s). Total du panier : '+document.getElementById('cart-total').textContent+'.');}
-function addProduct(id){const quantity=cart.get(id)||0;if(quantity===99){announce('Maximum de 99 unités pour '+products[id].name+'.');return;}cart.set(id,quantity+1);renderCart();announce(products[id].name+' ajouté au panier. Total : '+document.getElementById('cart-total').textContent+'.');}
-document.querySelectorAll('[data-add]').forEach(button=>{const id=button.dataset.add;button.disabled=false;button.setAttribute('aria-label','Ajouter '+products[id].name+' au panier');button.addEventListener('click',()=>addProduct(id));});
+const addedDialog=document.getElementById('added-dialog');
+let addedTrigger=null,addedScroll=0,openCartAfterClose=false;
+function showAdded(id,trigger){
+ addedTrigger=trigger;addedScroll=window.scrollY;openCartAfterClose=false;
+ document.getElementById('cart-status').textContent='';
+ document.getElementById('added-name').textContent=products[id].name;
+ document.getElementById('added-price').textContent='1 exemplaire · '+money.format(products[id].price/100);
+ addedDialog.showModal();
+}
+function closeAdded(viewCart=false){openCartAfterClose=viewCart;addedDialog.close();}
+addedDialog.addEventListener('close',()=>{
+ if(openCartAfterClose){const title=document.getElementById('cart-title');title.focus({preventScroll:true});title.scrollIntoView({behavior:'instant',block:'start'});}
+ else{if(addedTrigger&&addedTrigger.isConnected)addedTrigger.focus({preventScroll:true});window.scrollTo({top:addedScroll,behavior:'instant'});}
+});
+addedDialog.addEventListener('cancel',event=>{event.preventDefault();closeAdded();});
+addedDialog.addEventListener('keydown',event=>{if(event.key!=='Tab')return;const first=document.getElementById('close-added'),last=document.getElementById('view-cart');if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}});
+document.getElementById('close-added').addEventListener('click',()=>closeAdded());
+document.getElementById('continue-shopping').addEventListener('click',()=>closeAdded());
+document.getElementById('view-cart').addEventListener('click',()=>closeAdded(true));
+function addProduct(id,trigger){const quantity=cart.get(id)||0;if(quantity===99){announce('Maximum de 99 unités pour '+products[id].name+'.');return false;}cart.set(id,quantity+1);renderCart();showAdded(id,trigger);return true;}
+document.querySelectorAll('[data-add]').forEach(button=>{const id=button.dataset.add;button.disabled=false;button.setAttribute('aria-label','Ajouter '+products[id].name+' au panier');button.addEventListener('click',()=>addProduct(id,button));});
 document.querySelectorAll('[data-detail]').forEach(button=>{button.disabled=false;button.setAttribute('aria-label','Voir le produit '+products[button.dataset.detail].name);button.addEventListener('click',()=>{
  activeProduct=button.dataset.detail;const product=products[activeProduct];document.getElementById('detail-image').src=product.image;document.getElementById('detail-image').alt=product.alt;document.getElementById('detail-category').textContent=product.category;document.getElementById('detail-title').textContent=product.name;document.getElementById('detail-price').textContent=money.format(product.price/100);document.getElementById('detail-description').textContent=product.text;document.getElementById('detail-use').textContent=product.use;dialog.showModal();
 });});
 document.getElementById('close-detail').addEventListener('click',()=>dialog.close());
-document.getElementById('detail-add').addEventListener('click',()=>{if(activeProduct){addProduct(activeProduct);dialog.close();}});
+document.getElementById('detail-add').addEventListener('click',()=>{if(activeProduct){const id=activeProduct;if((cart.get(id)||0)===99){announce('Maximum de 99 unités pour '+products[id].name+'.');return;}const trigger=document.querySelector('[data-detail="'+id+'"]');dialog.close();addProduct(id,trigger);}});
 const checkout=document.getElementById('checkout'),orderForm=document.getElementById('order-form'),orderConfirmation=document.getElementById('order-confirmation');
 const orderInputs=Array.from(orderForm.querySelectorAll('input'));
 function clearOrderFields(){orderForm.reset();orderInputs.forEach(input=>{input.value='';input.setCustomValidity('');});}
