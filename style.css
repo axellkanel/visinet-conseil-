@@ -51,6 +51,28 @@ section {
     padding: 56px 32px;
 }
 
+/* Espacements du contenu des deux pages legales uniquement. */
+.blog:is([aria-labelledby="legal-title"], [aria-labelledby="privacy-title"]) .blog-title {
+    margin-bottom: 22px;
+}
+.blog:is([aria-labelledby="legal-title"], [aria-labelledby="privacy-title"]) .blog-section {
+    padding-block: 0;
+    margin-top: 32px;
+}
+.blog:is([aria-labelledby="legal-title"], [aria-labelledby="privacy-title"]) .blog-section:first-of-type {
+    margin-top: 24px;
+}
+.blog:is([aria-labelledby="legal-title"], [aria-labelledby="privacy-title"]) .blog-section h2 {
+    margin-bottom: 12px;
+}
+.blog:is([aria-labelledby="legal-title"], [aria-labelledby="privacy-title"]) .blog-section h3 {
+    margin-top: 16px;
+    margin-bottom: 10px;
+}
+.blog:is([aria-labelledby="legal-title"], [aria-labelledby="privacy-title"]) .blog-section > :is(p, ul, ol) + :is(p, ul, ol) {
+    margin-top: 10px;
+}
+
 .section-badge {
     display: inline-block;
     font-family: "Montserrat", sans-serif;
